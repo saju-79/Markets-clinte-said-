@@ -1,11 +1,29 @@
 import React from 'react';
+import { createBrowserRouter } from 'react-router';
+import MainLayout from '../layouts/MainLayout';
+import Home from '../pages/home/Home';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+import ErrorPage from '../pages/ErrorPage';
 
-const Router = () => {
-    return (
-        <div>
-            router
-        </div>
-    );
-};
-
-export default Router;
+export const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <MainLayout />,
+        // errorElement: <ErrorPage />,
+        children: [
+            {
+                index: true,   // 👈 use index instead of path "/"
+                element: <Home />
+            },
+        ]
+    },
+    {
+        path: "/login",   // 👈 remove leading slash
+        element: <Login />
+    },
+    {
+        path: "/register",
+        element: <Register />
+    }
+])
