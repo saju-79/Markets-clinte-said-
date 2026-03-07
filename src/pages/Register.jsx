@@ -1,12 +1,92 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FcGoogle } from 'react-icons/fc';
 import Container from '../Shareeded/Container';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import Logo from '../Shareeded/Logo';
 import { TbFidgetSpinner } from 'react-icons/tb';
+import { FaRoad } from 'react-icons/fa';
+import useAuth from '../hooks/api/useAuth';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const Register = () => {
-    const loading = null;
+    const navigate = useNavigate()
+    const [wait, setwait] = useState(false);
+    const { loading, handelemailAndPassword, updateUserProfile, setUser, signInWithGoogle } = useAuth();
+    // form submit handler
+    const handleSubmit = async event => {
+        event.preventDefault()
+        const form = event.target
+        const name = form.name.value;
+        const email = form.email.value;
+        const number = form.number.value;
+        const password = form.password.value;
+        const file = form.image?.files[0];
+        if (!file) {
+            console.log("No file selected");
+            return;
+        }
+        // 1. store the img from data 
+        const formData = new FormData();
+        formData.append("image", file);
+        // 🔑 Replace YOUR_IMGBB_API_KEY with your imgbb API key
+
+        try {
+            const apiKey = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_key}`;
+            // 2nd step
+            const res = await axios.post(apiKey, formData);
+            const urlimage = res.data.data.display_url;
+            setwait(true)
+
+            //2. User Registration
+            await handelemailAndPassword(email, password)
+            const customer = {
+                name: name,
+                email: email,
+                photoURL: urlimage,
+                creationTime: new Date().toISOString(),
+                lastSignInTime: new Date().toISOString(),
+                role: 'customer',
+            }
+            console.log(customer)
+            // uplod user db
+            // await saveUserInDb(userData)
+            //3. Save username & profile photo
+            await updateUserProfile(name, urlimage, number,)
+            // console.log(result)
+            navigate('/')
+            toast.success("Registration successful! Your account is ready ! ✅");
+        } catch (err) {
+            console.log(err)
+            toast.error(err?.message)
+        } finally {
+            setwait(false)
+        }
+    }
+    const handleGoogleSignIn = async () => {
+        try {
+            //User Registration using google
+            const result = await signInWithGoogle()
+            setUser(result)
+            const customer = {
+                name: result?.user?.displayName,
+                email: result?.user?.email,
+                photoURL: result?.user?.photoURL,
+                creationTime: result?.user?.metadata?.creationTime,
+                lastSignInTime: result?.user?.metadata?.lastSignInTime,
+                role: 'customer',
+            }
+            // uplod user Db
+            // await saveUserInDb(userData)
+            console.log(customer)
+            navigate('/')
+            toast.success("Signed up with Google successfully! 🎉");
+        } catch (err) {
+            console.log(err)
+            toast.error(err?.message)
+        }
+    }
+
     return (
         <Container>
             <div className="p-4">
@@ -18,7 +98,7 @@ const Register = () => {
                             <p className='text-sm text-gray-400'>Welcome to MarketPulse</p>
                         </div>
                         <form
-                            // onSubmit={handleSubmit}
+                            onSubmit={handleSubmit}
                             noValidate=''
                             action=''
                             className='space-y-6 ng-untouched ng-pristine ng-valid'
@@ -97,10 +177,10 @@ const Register = () => {
                             <div>
                                 <button
                                     type='submit'
-                                    disabled={loading}
+                                    disabled={loading || wait}
                                     className='bg-primary w-full rounded-md py-3 text-white'
                                 >
-                                    {loading ? (
+                                    {loading || wait ? (
                                         <TbFidgetSpinner className='animate-spin m-auto' />
                                     ) : (
                                         'Continue'
@@ -116,7 +196,7 @@ const Register = () => {
                             <div className='flex-1 h-px sm:w-16 dark:bg-gray-700'></div>
                         </div>
                         <div
-                            // onClick={handleGoogleSignIn}
+                            onClick={handleGoogleSignIn}
                             className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer'
                         >
                             <FcGoogle size={32} />

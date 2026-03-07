@@ -1,12 +1,70 @@
 import React from 'react';
 import Container from '../Shareeded/Container';
-import { Link } from 'react-router';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router';
 import { TbFidgetSpinner } from 'react-icons/tb';
 import { FcGoogle } from 'react-icons/fc';
 import Logo from '../Shareeded/Logo';
+import useAuth from '../hooks/api/useAuth';
+import { toast } from 'react-toastify';
+import Loading from '../Shareeded/Loading';
 
 const Login = () => {
-    const loading = null;
+    const { handelLogin, loading, user, signInWithGoogle } = useAuth()
+    const navigate = useNavigate();
+    const location = useLocation();
+    const from = location?.state?.from?.pathname || '/'
+    if (user) return <Navigate to={from} replace={true} />
+
+    // form submit handler
+    const handleSubmit = async event => {
+        event.preventDefault()
+        const form = event.target
+        const email = form.email.value;
+        const password = form.password.value;
+
+        try {
+            //User Login
+            const result = await handelLogin(email, password)
+            const customer = {
+                name: result?.user?.displayName,
+                email: result?.user?.email,
+                photoURL: result?.user?.photoURL,
+                creationTime: result?.user?.metadata?.creationTime,
+                lastSignInTime: result?.user?.metadata?.lastSignInTime,
+                role: 'customer',
+            }
+            // update user
+            console.log(customer)
+            navigate(from, { replace: true })
+            toast.success("Login successful! Welcome back 👋");
+        } catch (err) {
+            console.log(err)
+            toast.error(err?.message)
+        }
+    }
+    // google handel section 
+    const handleGoogleSignIn = async () => {
+        try {
+            //User Registration using google
+            const result = await signInWithGoogle()
+            const customer = {
+                name: result?.user?.displayName,
+                email: result?.user?.email,
+                photoURL: result?.user?.photoURL,
+                creationTime: result?.user?.metadata?.creationTime,
+                lastSignInTime: result?.user?.metadata?.lastSignInTime,
+                role: 'customer',
+            }
+            // uplod user Db
+            // await saveUserInDb(userData)
+            console.log(customer)
+            navigate(from, { replace: true })
+            toast.success("Signed in with Google successfully! 🎉");
+        } catch (err) {
+            console.log(err)
+            toast.error(err?.message)
+        }
+    }
     return (
         <Container>
             <div className="p-4">
@@ -20,7 +78,7 @@ const Login = () => {
                             </p>
                         </div>
                         <form
-                            // onSubmit={handleSubmit}
+                            onSubmit={handleSubmit}
                             noValidate=''
                             action=''
                             className='space-y-6 ng-untouched ng-pristine ng-valid'
@@ -60,6 +118,7 @@ const Login = () => {
 
                             <div>
                                 <button
+                                    disabled={loading}
                                     type='submit'
                                     className='bg-primary w-full rounded-md py-3 text-white'
                                 >
@@ -84,7 +143,7 @@ const Login = () => {
                             <div className='flex-1 h-px sm:w-16 dark:bg-gray-700'></div>
                         </div>
                         <div
-                            // onClick={handleGoogleSignIn}
+                            onClick={handleGoogleSignIn}
                             className='flex justify-center items-center space-x-2 border m-3 p-2 border-gray-300 border-rounded cursor-pointer'
                         >
                             <FcGoogle size={32} />

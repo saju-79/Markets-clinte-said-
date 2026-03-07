@@ -4,26 +4,22 @@
 
 import { Link, NavLink } from "react-router";
 import Logo from "../Shareeded/Logo";
+import useAuth from "../hooks/api/useAuth";
+import { CiLogout } from "react-icons/ci";
 
 
 const Navbar = () => {
-    // const { user, logOut } = useAuth();
+    const { user, handelSginOut } = useAuth();
+    
     // const { role } = useRole();
-    const role = "vendor"
-    const user = null;
+    // const role = "vendor"
+
     // const navigate = useNavigate();
 
     /* const handleLogout = async () => {
         await logOut();
         navigate("/");
     }; */
-
-    const dashboardPath =
-        role === "admin"
-            ? "/dashboard/admin/users"
-            : role === "vendor"
-                ? "/dashboard/vendor/my-products"
-                : "/dashboard/profile";
 
     const navLinks = (
         <>
@@ -77,7 +73,7 @@ const Navbar = () => {
                 {user && (
                     <>
                         {/* Dashboard Button */}
-                        <Link to={dashboardPath} className="btn btn-accent">
+                        <Link to='/dashboard' className="btn btn-accent">
                             📊 Dashboard
                         </Link>
 
@@ -104,8 +100,8 @@ const Navbar = () => {
                                     <Link to="/dashboard/profile">👤 Profile</Link>
                                 </li>
                                 <li>
-                                    <button >
-                                        🚪 Logout
+                                    <button onClick={() => handelSginOut()} >
+                                        <CiLogout /> Logout
                                     </button>
                                 </li>
                             </ul>
