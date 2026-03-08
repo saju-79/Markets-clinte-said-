@@ -1,0 +1,92 @@
+import React, { useState } from 'react';
+import AddPlantForm from '../../all-menu/AddPlantForm';
+import { toast } from 'react-toastify';
+import useAuth from '../../hooks/api/useAuth';
+import { useForm } from 'react-hook-form';
+
+const AddPlant = () => {
+    const { user } = useAuth()
+    const [imageURL, setImageURL] = useState("");
+    const [isUploading, setIsUploading] = useState(false)
+    // console.log(user)
+
+    const {
+        handleSubmit,
+        register,
+        reset,
+    }
+        = useForm();
+
+    const handleImageUpload = async e => {
+        setIsUploading(true)
+        e.preventDefault()
+        // e.target.reset()
+        const image = e.target.files[0];
+        if (!image) {
+            return "image not  a reured"
+        }
+        // console.log(image ,"imsge asiiii ")
+        try {
+            // 1. store the img from data 
+            const formData = new FormData();
+            formData.append("image", image);
+            // 🔑 Replace YOUR_IMGBB_API_KEY with your imgbb API key
+            // const apiKey = `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_image_key}`;
+            // 2nd step
+            // const res = await .post(apiKey, formData);
+            // const url = res.data.data.display_url;
+            setImageURL("")
+            // console.log(url, "sdsdsjdsahjf  aso")
+        } catch (err) {
+            toast.error(err?.message)
+            console.log(err)
+        } finally {
+            setIsUploading(false)
+        }
+
+    }
+
+    // const axiosSecure = useAxiosSecure()
+    console.log(imageURL)
+    const handleAddPlantData = async (formData) => {
+        const quant = parseInt(formData?.quantity);
+        const price = parseInt(formData?.price);
+        try {
+            const userInfo = {
+                name: user.displayName,
+                email: user.email,
+                userPhoto: user.photoURL,
+            }
+            const finalData = { ...formData, quantity: quant, price: price, userData: userInfo, Image: imageURL };
+            console.log("Sending:", finalData);
+            // const { data } = await ax.post('/add-plant', finalData);
+
+           /*  if (data?.insertedId) {
+                toast.success('🌿 Plant Data Added Successfully!');
+            }
+
+            console.log(data); */
+
+        } catch (error) {
+            console.error("Post Error:", error.response?.data || error.message);
+            toast.error('Something went wrong!');
+        }
+
+        reset();
+    };
+    return (
+        <div>
+            {/* Form */}
+            <AddPlantForm
+                handleAddPlantData={handleAddPlantData}
+                handleSubmit={handleSubmit}
+                register={register}
+                handleImageUpload={handleImageUpload}
+                isUploading={isUploading}
+                imageURL={imageURL}
+            />
+        </div>
+    );
+};
+
+export default AddPlant;

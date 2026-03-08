@@ -12,6 +12,9 @@ import { Link, Navigate } from 'react-router'
 import MenuItem from '../Shareeded/MenuItem'
 import Logo from '../Shareeded/Logo'
 import useAuth from '../hooks/api/useAuth'
+import AdminMenu from '../manu/AdminMenu'
+import CustomerMenu from '../manu/CustomerMenu'
+import SellerMenu from '../manu/SellerMenu'
 // import useAuth from '../hooks/api/useAuth'
 // import SellerMenu from './Menu/SellerMenu'
 // import CustomerMenu from './Menu/CustomerMenu'
@@ -19,7 +22,7 @@ import useAuth from '../hooks/api/useAuth'
 // import useRole from '../../../hooks/useRole'
 // import LoadingSpinner from '../../Shared/LoadingSpinner'
 const Sidebar = () => {
-    const { handelSginOut , user } = useAuth();
+    const { handelSginOut, user } = useAuth();
     const [isActive, setActive] = useState(false);
     // const [role, roleLoading] = useRole();
     // Sidebar Responsive Handler
@@ -27,7 +30,7 @@ const Sidebar = () => {
         setActive(!isActive)
     }
     // if (roleLoading) return <LoadingSpinner></LoadingSpinner>
-    if(!user)return <Navigate to="/"></Navigate>
+    if (!user) return <Navigate to="/"></Navigate>
     return (
         <>
             {/* Small Screen Navbar */}
@@ -64,6 +67,9 @@ const Sidebar = () => {
                             {/*  Menu Items */}
                             {/*  {role === "customer" && <CustomerMenu />}
                             {role === "seller" && <SellerMenu />} */}
+                            <CustomerMenu></CustomerMenu>
+                            <SellerMenu></SellerMenu>
+                            <AdminMenu></AdminMenu>
 
                             <MenuItem
                                 icon={BsGraphUp}
